@@ -1,0 +1,10 @@
+Stemness
+  Oct4, Nanog, SOX2, KLF4, DAZL
+Differentiation
+  GATA4, PAX6, AFP, SMA
+Histone production
+  NPAT
+Imprinted gene list
+  <rds>
+Bivalent gene list
+  <rds>
