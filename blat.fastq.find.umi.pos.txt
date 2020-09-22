@@ -1,0 +1,8 @@
+### extract fastq for target panel ###
+## 1.1. prepare a chr:start-stop per line file for extraction
+## 1.2. make fasta file for blat reference 
+  samtools faidx /rsrch3/scratch/mol_cell_onc/jyao/work/gatk_bundle_hg38/original.fasta.copy \
+  -r merged.3.panels.names.txt >panel.3.for.blat.fasta
+  
+### blat 1,000,000 fastq sequences ###
+### figure out where UMI seqs are ###
