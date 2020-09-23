@@ -85,7 +85,7 @@ add_UMI_record = function(s1, s2){
   result[[umi]] <<- c(result[[umi]], pe)
 }
 
-save_UMI_fasta = function(u){
+make_UMI_fasta = function(u){
   a = table(u); f = NULL
   for(i in 1:length(a)){
     f = c(f, paste0('>seq_', i, '_count=', a[i]))
