@@ -27,13 +27,23 @@ add_UMI_record = function(s1, s2){
   }
 }
 
-save_UMI_fasta = function(u){
+make_UMI_fasta = function(u){
   ## input:
   ## u: UMI record list of s1/s2 PE sequences w/ UMI trimmed
   ## procedure:
   ## concatenate s1/s2, make table
   ## for each unique s1/s2
-  ##   
+  ##   write fasta >line with freq
+  ##   write fasta sequence s1/s2
+  ## return fasta string
+  
+  s12 = paste0(u$s1, u$s2)
+  a = table(s12); f = NULL
+  for(i in 1:length(a)){
+    f = c(f, paste0('>seq_', i, '_count=', a[i]))
+    f = c(f, names(a[i]))
+  }
+  return(f)
 }
 
 result = list()
@@ -51,6 +61,15 @@ while(1){
     add_UMI_record(seq1[i], seq2[i])
   }
   n = n + 1
-  print(paste0(n,'M PE reads processed ... ', length(result),' UMIs found')
+  print(paste0(n,'M PE reads processed ... ', length(result),' UMIs found'))
 }
 close(fh1); close(fh2)
+
+dir.create('umi')
+for(u in names(result)){
+  savename = paste0('umi/', u, '.fasta')
+  writeLines(make_UMI_fasta(result[[u]]), savename)
+}
+
+        
+        
