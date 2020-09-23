@@ -8,10 +8,15 @@
 ##
 ##  results
 ##  182Mb/3M- records took 25 min, so larger 3,800Mb file may take 9 hours
+##  182Mb/3M records v2 4 min, so larger 3.8Gb may take 1.5 hour
+##
 ##  NANA.fasta produced, with 350K (up to 10%), what are these?
-##   Group.1       x
-## 1       0  384988
-## 2       1 2615012
+##  NANA removed in v2
+##
+##  purity      v1      v2
+##       0  384988   33522 <- 1.2% so this part can be ignored
+##       1 2615012 2615012
+
 add_UMI_record = function(s1, s2){
   ## input:
   ## s1/2: PE sequence reads
