@@ -8,14 +8,15 @@
 ##
 ##  results
 ##  182Mb/3M- records took 25 min, so larger 3,800Mb file may take 9 hours
-##  182Mb/3M records v2 4 min, so larger 3.8Gb may take 1.5 hour
+##  182Mb/3M records v2 4 min, so larger 3.8Gb/56M records took 8 hours (OK)
 ##
 ##  NANA.fasta produced, with 350K (up to 10%), what are these?
 ##  NANA removed in v2
 ##
-##  purity      v1      v2
-##       0  384988   33522 <- 1.2% so this part can be ignored
-##       1 2615012 2615012
+##  purity v1small v2small  v2large
+##       0  384988   33522   675032 <- 1.2% constant 
+##       1 2615012 2615012 54865344 
+##  from here we know ambiguous UMI 1.2% can be removed
 
 add_UMI_record = function(s1, s2){
   ## input:
