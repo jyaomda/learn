@@ -56,8 +56,8 @@ fh2 = gzfile('raw.R2.fastq.gz', 'r')
 
 while(1){
   x1 = readLines(fh1, read_block)
-  if(length(x1) == 0){ break }
   x2 = readLines(fh2, read_block)
+  if(length(x1) == 0){ break }
   seq1 = x1[seq(2, read_block, 4)]
   seq2 = x2[seq(2, read_block, 4)]
   for(i in 1:(read_block/4)){
