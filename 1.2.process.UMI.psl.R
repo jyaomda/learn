@@ -1,8 +1,18 @@
-### looking at psl after blat one UMI.fasta ###
+### looking at psl after blat all UMI.fasta ###
 
-# fname = file.choose()
-# y = readLines(fname, 6)
-# paste0(unlist(strsplit(y[3],'\t')), unlist(strsplit(y[4],'\t')))
+fname = 'blat.valid.UMIs.psl'
+x = read.delim(fname, skip=5, header=F)
+names(x)=c('match','misMatch','repMatch','Ns','qGapCnt','qGapBases',
+           'TgapCnt','TgapBases','strand','Qname','Qsize','Qstart',
+           'Qend','Tname','Tsize','Tstart','Tend','blockCnt',
+           'blockSizes','qStartMatch','TstartMatch')
+x$umi = sapply(strsplit(x$Qname),'_'),'[',2)
+umi = unique(x$umi)
+result = 
+for(u in umi){
+  y = x[x$umi == u, ]
+  ######################################### paused here 
+}
 
 parse_target_start = function(a){
   ## input
@@ -46,13 +56,9 @@ parse_target = function(y){
   return(rbind(a,b))
 }
 
-parse_UMI_psl = function(fname){
+parse_UMI_psl = function(umi){
   ### load blat psl result ###
-  x = read.delim(fname, skip=5, header=F)
-  names(x)=c('match','misMatch','repMatch','Ns','qGapCnt','qGapBases',
-             'TgapCnt','TgapBases','strand','Qname','Qsize','Qstart',
-             'Qend','Tname','Tsize','Tstart','Tend','blockCnt',
-             'blockSizes','qStartMatch','TstartMatch')
+
  
   ### filter off unpaired reads ###
   x$mapSize = x$Tend - x$Tstart +1
