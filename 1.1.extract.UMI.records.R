@@ -18,19 +18,32 @@
 ##       1 2615012 2615012 54865344 
 ##  from here we know ambiguous UMI 1.2% can be removed
 
-### version 2.1 ###
+### version 3 ###
 add_UMI_record = function(s1, s2){
+  ## input
+  ## s1/s2: PE reads
+  ## note
+  ## use size = 100 for this project
+  ## assume all fastq reads are 100 nt in length
+  
   if(is.na(s1)){ return() }
-  ### change size to 100 and skip nchr() ###
   umi = paste0(substr(s1,1,3), substr(s2,1,3))
   pe = paste0(substr(s1,4,100), substr(s2,4,100))
   result[[umi]] <<- c(result[[umi]], pe)
 }
 
 make_UMI_fasta = function(u){
+  ## input
+  ## u: list of list with UMI name and record (PE strings)
+  ## procedure
+  ## produce a fasta string with
+  ##   >UMI_<umi_str>_<seqNo>_<readCount> header, plus
+  ##   concatenated read1 + read2 (w/o UMI overhangs)
+  
+  umi = names(u); u = u[[1]]
   a = table(u); f = NULL
   for(i in 1:length(a)){
-    f = c(f, paste0('>seq_', i, '_count=', a[i]))
+    f = c(f, paste0('>UMI_', umi, '_seq_', i, '_count=', a[i]))
     f = c(f, names(a[i]))
   }
   return(f)
@@ -55,14 +68,14 @@ while(1){
 }
 close(fh1); close(fh2)
 
-dir.create('umi')
-pos = grep('N', names(result))
-good_umi = names(result)[setdiff(1:length(result), pos)]
+### version 2.2. do not write disk ###
 
+pos = grep('N', names(result)); fa_str = NULL
+good_umi = names(result)[setdiff(1:length(result), pos)]
 for(u in good_umi){
-  savename = paste0('umi/', u, '.fasta')
-  writeLines(make_UMI_fasta(result[[u]]), savename)
+  fa_str = c(fa_str, make_UMI_fasta(result[u]))
 }
+writeLines(fa_str, 'valid.UMI.seq.fasta')
 
 ########## evaluate results ###########
 ### with in umi folder 
