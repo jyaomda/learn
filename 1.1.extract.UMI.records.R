@@ -20,6 +20,9 @@
 ##       0  384988   33522   675032 <- 1.2% constant 
 ##       1 2615012 2615012 54865344 
 ##  from here we know ambiguous UMI 1.2% can be removed
+## 
+##  even though v4 sounds cleaner, computational wise it is slower
+##  the winning version is v3.1. in this case (case closed) ##
 
 ### version 3 ###
 add_UMI_record = function(s1, s2){
