@@ -64,7 +64,7 @@ while(1){
     add_UMI_record(seq1[i], seq2[i])
   }
   n = n + 1
-  print(paste0(n*(read_block/4000000),'M PE reads processed ... ', length(result),' UMIs found'))
+  print(paste0(n*(read_block/4000000),'M reads, ', length(result),' UMIs'))
 }
 close(fh1); close(fh2)
 
