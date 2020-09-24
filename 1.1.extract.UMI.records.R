@@ -9,6 +9,9 @@
 ##  results
 ##  182Mb/3M- records took 25 min, so larger 3,800Mb file may take 9 hours
 ##  182Mb/3M records v2 4 min, so larger 3.8Gb/56M records took 8 hours (OK)
+##  for v2 w/ combined fasta, it takes 9.7 hours to write 5Gb fasta,
+##    while blat of this 5Gb fasta to reference panel only takes 5 min
+##    therefore blat is not the bottle neck step here, extremely fast!
 ##
 ##  NANA.fasta produced, with 350K (up to 10%), what are these?
 ##  NANA removed in v2
