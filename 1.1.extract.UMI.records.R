@@ -10,11 +10,11 @@
 ##  182Mb/3M- records took 25 min, so larger 3,800Mb file may take 9 hours
 ##  182Mb/3M records v2 4 min, so larger 3.8Gb/56M records took 8 hours (OK)
 ##  for v2 w/ combined fasta, it takes 9.7 hours to write 5Gb fasta,
-##    while blat of this 5Gb fasta to reference panel only takes 5 min
+##    whereas blat of this 5Gb fasta to reference panel takes only 5 min
 ##    therefore blat is not the bottle neck step here, extremely fast!
 ##
 ##  NANA.fasta produced, with 350K (up to 10%), what are these?
-##  NANA removed in v2
+##  NANA removed in v2, likely from last reading block
 ##
 ##  purity v1small v2small  v2large
 ##       0  384988   33522   675032 <- 1.2% constant 
@@ -25,31 +25,28 @@
 add_UMI_record = function(s1, s2){
   ## input
   ## s1/s2: PE reads
+  ## procedure
+  ##   only valid UMI are recorded
   ## note
   ## use size = 100 for this project
   ## assume all fastq reads are 100 nt in length
   
+  ### if no read, bad UMI, pass ###
   if(is.na(s1)){ return() }
   umi = paste0(substr(s1,1,3), substr(s2,1,3))
-  pe = paste0(substr(s1,4,100), substr(s2,4,100))
-  result[[umi]] <<- c(result[[umi]], pe)
-}
-
-make_UMI_fasta = function(u){
-  ## input
-  ## u: list of list with UMI name and record (PE strings)
-  ## procedure
-  ## produce a fasta string with
-  ##   >UMI_<umi_str>_<seqNo>_<readCount> header, plus
-  ##   concatenated read1 + read2 (w/o UMI overhangs)
+  pos = grep('N', umi)
+  if(length(pos)>0){ return() }
   
-  umi = names(u); u = u[[1]]
-  a = table(u); f = NULL
-  for(i in 1:length(a)){
-    f = c(f, paste0('>UMI_', umi, '_seq_', i, '_count=', a[i]))
-    f = c(f, names(a[i]))
+  ### use PE seq as list index, record freq ###
+  pe = paste0(substr(s1,4,100), substr(s2,4,100))
+  if(umi %in% names(result)){
+    if(pe %in% names(result[[umi]])){
+      result[[umi]][[pe]] <<- result[[umi]][[pe]] + 1
+    }else{ result[[umi]][[pe]] <<- 1 }
+  }else{
+    result[[umi]] <<- list()
+    result[[umi]][[pe]] <<- 1
   }
-  return(f)
 }
 
 result = list()
@@ -71,14 +68,16 @@ while(1){
 }
 close(fh1); close(fh2)
 
-### version 2.2. do not write disk ###
-
-pos = grep('N', names(result)); fa_str = NULL
-good_umi = names(result)[setdiff(1:length(result), pos)]
-for(u in good_umi){
-  fa_str = c(fa_str, make_UMI_fasta(result[u]))
+### version 3, just make fasta ###
+fa_str = NULL
+for(u in names(result)){
+  z = result[[u]]
+  for(i in 1:length(z)){
+    fa_str = c(fa_str, paste0('>UMI_', u,'_seq', i,'_count=', z[[i]]))
+    fa_str = c(fa_str, names(z)[i])
+  }
 }
-writeLines(fa_str, 'valid.UMI.seq.fasta')
+writeLines(fa_str, 'valid.UMI.seq.v3.fasta')
 
 ########## evaluate results ###########
 ### with in umi folder 
