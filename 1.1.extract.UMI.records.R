@@ -28,78 +28,83 @@
 ##  even though v4 sounds cleaner, computational wise it is slower
 ##  the winning version is v3.1. in this case (case closed) ##
 
-### version 3 ###
+### version 3.3 as of 9/26/2020 ###
+
+#################### functions for extracting valid UMIs ####################
+
 add_UMI_record = function(s1, s2){
-  ## input
-  ## s1/s2: PE reads
-  ## procedure
-  ##   only valid UMI are recorded
-  ## note
-  ## use size = 100 for this project
-  ## assume all fastq reads are 100 nt in length
+  ## input s1/s2: PE reads
+  ## use size 100 for this project
   
-  ### if no read, bad UMI, pass ###
+  ### exit for NA str or bad UMI ###
   if(is.na(s1)){ return() }
   umi = paste0(substr(s1,1,3), substr(s2,1,3))
   pos = grep('N', umi)
   if(length(pos)>0){ return() }
-  
-  ### use PE seq as list index, record freq ###
+
+  ### append PE to existing list ###
   pe = paste0(substr(s1,4,100), substr(s2,4,100))
-  if(umi %in% names(result)){
-    if(pe %in% names(result[[umi]])){
-      result[[umi]][[pe]] <<- result[[umi]][[pe]] + 1
-    }else{ result[[umi]][[pe]] <<- 1 }
-  }else{
-    result[[umi]] <<- list()
-    result[[umi]][[pe]] <<- 1
+  result[[umi]] <<- c(result[[umi]], pe)
+}
+
+make_UMI_fasta = function(u){
+  ## input u: content of PE strings
+  ## produce a fasta string:
+  ##   >$seqNo_$readCount header, followed by
+  ##   PE read1 + read2 (w/o UMI overhangs)
+  
+  a = table(u); f = NULL
+  for(i in 1:length(a)){
+    f = c(f, paste0('>s', i, '_read=', a[i]))
+    f = c(f, names(a[i]))
+  }
+  return(f)
+}
+
+extract_UMI = function(){
+
+  ### prepare file handles ###
+  result = list()
+  read_block = 4000000; n = 0
+  fh1 = gzfile('raw.R1.fastq.gz', 'r')
+  fh2 = gzfile('raw.R2.fastq.gz', 'r')
+
+  ### read fastq by block ###
+  while(1){
+    x1 = readLines(fh1, read_block)
+    x2 = readLines(fh2, read_block)
+    if(length(x1) == 0){ break }
+    seq1 = x1[seq(2, read_block, 4)]
+    seq2 = x2[seq(2, read_block, 4)]
+
+    for(i in 1:(read_block/4)){
+      add_UMI_record(seq1[i], seq2[i])
+    }
+    n = n + 1
+    print(paste0(n*(read_block/4000000),'M PE reads processed'))
+  }
+  close(fh1); close(fh2)
+
+  ### write fasta/psl file by UMI ###
+  dir.create('umi_files')
+  for(u in names(result)){
+    savename = paste0('umi_files/', u, '.fasta')
+    writeLines(make_UMI_fasta(result[[u]]), savename)
+
+    ## blat each fasta file, save psl ##
+    cmd_line = 'blat ../../2020_MWang_MCL_PM1304/panel.3.for.blat.fasta'
+    cmd_line = paste(cmd_line, savename)
+    savename = gsub('.fasta','.psl',savename)
+    cmd_line = paste(cmd_line, savename)
+    system(cmd_line)
   }
 }
 
-result = list()
-read_block = 2000000; n = 0
-fh1 = gzfile('raw.R1.fastq.gz', 'r')
-fh2 = gzfile('raw.R2.fastq.gz', 'r')
+#################### main procedure starts here ####################
 
-while(1){
-  x1 = readLines(fh1, read_block)
-  x2 = readLines(fh2, read_block)
-  if(length(x1) == 0){ break }
-  seq1 = x1[seq(2, read_block, 4)]
-  seq2 = x2[seq(2, read_block, 4)]
-  for(i in 1:(read_block/4)){
-    add_UMI_record(seq1[i], seq2[i])
-  }
-  n = n + 1
-  print(paste0(n*(read_block/4000000),'M reads, ', length(result),' UMIs'))
+if(file.exists('umi_files')){
+  print('UMI already extracted, proceed to find representative UMIs ...')
+} else {
+  print('UMI have not been extracted, start extracting UMIs ...')
+  extract_UMI()
 }
-close(fh1); close(fh2)
-
-### version 3, just make fasta ###
-fa_str = NULL
-for(u in names(result)){
-  z = result[[u]]
-  for(i in 1:length(z)){
-    fa_str = c(fa_str, paste0('>UMI_', u,'_seq', i,'_count=', z[[i]]))
-    fa_str = c(fa_str, names(z)[i])
-  }
-}
-writeLines(fa_str, 'valid.UMI.seq.v3.fasta')
-
-########## evaluate results ###########
-### with in umi folder 
-fnames = dir('.', 'fasta$')
-reads = NULL
-for(f in fnames){
-  x = readLines(f)
-  y = x[seq(1, length(x), 2)]
-  z = sapply(strsplit(y,'count='),'[',2)
-  reads = c(reads, sum(as.numeric(z)))
-}
-names(reads) = fnames
-a = as.data.frame(reads)
-a$good = 1; pos = grep('N', row.names(a))
-a[pos, 'good'] = 0
-aggregate(a[,1], by=list(a$good), sum)
-
-        
