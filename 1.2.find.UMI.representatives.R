@@ -1,5 +1,5 @@
 #### processing psl and find UMI representatives ####
-### input: psl file
+### input: psl files w/in umi_files folder
 ##  prodedure
 ##  for each umi collect records
 ##    limit mapping size {80,120} & gap size {0,10}
@@ -7,6 +7,17 @@
 ##    for each target region tagged by this umi
 ##      find significant starts (>33% of population) on two strands
 ##      collect seq reads having starts on both strands
+##      allow two umi tagging only, allow 1-bp start shift
+##  merge result in a big table
+##  adjust alignment start position !
+##  calculate median extended count per start per target region
+##    this is used to estimate coverage (amplifcation of each UMI)
+##    find cutoff exteanded read to remove non-amplified UMIs
+##  filter representative UMI table
+##    remove UMIs having reads below extended read cutoff
+##  the result UMI table is ready for pileup
+
+folder = 'umi_files'
 
 fname = 'blat.valid.UMIs.psl'
 psl = read.delim(fname, skip=5, header=F)
