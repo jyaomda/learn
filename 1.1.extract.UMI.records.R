@@ -9,9 +9,13 @@
 ##  results
 ##  182Mb/3M- records took 25 min, so larger 3,800Mb file may take 9 hours
 ##  182Mb/3M records v2 4 min, so larger 3.8Gb/56M records took 8 hours (OK)
+##  final v3.2 largeted 56M records took 11 hours to extract and blat
+##    this is ultimately chosen over combined UMI processing below
+## 
 ##  for v2 w/ combined fasta, it takes 9.7 hours to write 5Gb fasta,
 ##    whereas blat of this 5Gb fasta to reference panel takes only 5 min
 ##    therefore blat is not the bottle neck step here, extremely fast!
+##    this branch is terminated because 4,096 files provide indexing
 ##
 ##  NANA.fasta produced, with 350K (up to 10%), what are these?
 ##  NANA removed in v2, likely from last reading block
